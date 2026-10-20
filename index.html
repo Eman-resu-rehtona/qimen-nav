@@ -1,76 +1,64 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ци Мень • Навигатор</title>
-    <!-- Стабильная версия CSS без блокировок со стороны iOS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram WebApp API -->
-    <script src="https://telegram.org"></script>
-    <style>
-        body {
-            background-color: #121212;
-            color: #E5E5E5;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        .compass-ring {
-            transition: transform 0.1s ease-out;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<script src="https://telegram.org"></script>
+<style>
+body{background:#121212;color:#e5e5e5;font-family:monospace;padding:20px;text-align:center;}
+header{border-bottom:1px solid #262626;padding-bottom:10px;margin-bottom:20px;display:flex;justify-content:space-between;font-size:11px;}
+#compass{width:220px;height:220px;border-radius:50%;border:1px solid #404040;margin:30px auto;position:relative;background:#0a0a0a;display:flex;align-items:center;justify-content:center;transition:transform 0.1s;}
+.axis{position:absolute;background:rgba(255,255,255,0.1);}
+#btn{background:#1f1f1f;color:#a3a3a3;border:1px solid #404040;padding:10px 20px;border-radius:4px;cursor:pointer;}
+.card{background:#0a0a0a;border:1px solid #262626;padding:10px;margin-top:10px;text-align:left;font-size:12px;}
+</style>
 </head>
-<body class="flex flex-col h-screen justify-between p-4 antialiased">
-
-    <!-- Хедер -->
-    <header class="border-b border-neutral-800 pb-3">
-        <div class="flex justify-between items-center text-[10px] tracking-wider text-neutral-500">
-            <span>ПРОФИЛЬ: ГЭН ШЭН (МЕТАЛЛ)</span>
-            <span id="solar-time-display">ИСТИННОЕ СОЛНЕЧНОЕ: --:--</span>
-        </div>
-        <div class="mt-2 flex justify-between items-baseline">
-            <h1 class="text-lg font-bold tracking-tight text-neutral-200">ПРОГУЛКИ ЦИ МЕНЬ</h1>
-            <div id="current-hour-pillar" class="text-xs px-2 py-0.5 bg-neutral-900 border border-neutral-800 rounded text-neutral-300">
-                -- --
-            </div>
-        </div>
-    </header>
-
-    <!-- Компас -->
-    <main class="flex flex-col items-center justify-center my-auto relative">
-        <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-neutral-200 absolute top-4 z-10"></div>
-        
-        <div id="compass" class="compass-ring w-60 h-60 rounded-full border border-neutral-800 flex items-center justify-center relative bg-neutral-950/50">
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-full h-[1px] bg-neutral-900/30"></div>
-                <div class="h-full w-[1px] bg-neutral-900/30"></div>
-            </div>
-            
-            <span class="absolute top-2 font-bold text-neutral-400 text-xs">N</span>
-            <span class="absolute right-2 font-bold text-neutral-600 text-xs">E</span>
-            <span class="absolute bottom-2 font-bold text-neutral-600 text-xs">S</span>
-            <span class="absolute left-2 font-bold text-neutral-600 text-xs">W</span>
-            
-            <div class="flex flex-col items-center">
-                <span id="azimuth-val" class="text-2xl font-bold text-neutral-100">0°</span>
-                <span id="direction-letter" class="text-[10px] text-neutral-500 mt-0.5 tracking-wider">СЕВЕР</span>
-            </div>
-        </div>
-
-        <button id="geo-btn" class="mt-6 text-xs text-neutral-400 border border-neutral-800 bg-neutral-900 px-4 py-2 rounded">
-            Включить компас
-        </button>
-    </main>
-
-    <!-- Активные структуры -->
-    <footer class="border-t border-neutral-800 pt-3">
-        <div class="text-[10px] text-neutral-500 tracking-wider mb-2">АКТИВНЫЕ СТРУКТУРЫ:</div>
-        <div id="structures-list" class="space-y-2">
-            <div class="p-3 bg-neutral-900 border border-neutral-800 rounded flex justify-between items-center">
-                <div class="text-xs text-neutral-400">Синхронизация шлюзов...</div>
-            </div>
-        </div>
-    </footer>
-
+<body>
+<header><span id="st">СОЛНЦЕ: --:--</span><span id="hp">-- --</span></header>
+<div id="pointer" style="color:#fff;font-size:18px;">▲</div>
+<div id="compass">
+    <div class="axis" style="width:100%;height:1px;"></div>
+    <div class="axis" style="height:100%;width:1px;"></div>
+    <div style="z-index:5;"><h2 id="az">0°</h2><small id="dl">СЕВЕР</small></div>
+</div>
+<button id="btn">Включить гироскоп</button>
+<div id="box"></div>
+<script>
+const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
+function tick(){
+    const now=new Date(),utc=now.getTime()+(now.getTimezoneOffset()*60000);
+    const sol=new Date(utc+(4*30.2525*60000));
+    document.getElementById('st').innerText=`ИСТИННОЕ: ${String(sol.getHours()).padStart(2,'0')}:${String(sol.getMinutes()).padStart(2,'0')}`;
+    let h=sol.getHours(),b="";
+    if(h>=23||h<1)b="子 Крыса";else if(h>=1&&h<3)b="丑 Бык";else if(h>=3&&h<5)b="寅 Тигр";else if(h>=5&&h<7)b="卯 Кролик";
+    else if(h>=7&&h<9)b="辰 Дракон";else if(h>=9&&h<11)b="巳 Змея";else if(h>=11&&h<13)b="午 Лошадь";else if(h>=13&&h<15)b="未 Коза";
+    else if(h>=15&&h<17)b="申 Обезьяна";else if(h>=17&&h<19)b="酉 Петух";else if(h>=19&&h<21)b="戌 Собака";else if(h>=21&&h<23)b="亥 Свинья";
+    document.getElementById('hp').innerText=b;
+}
+const data={"Вторник":[{p:"СЗ",n:"Птица падает в гнездо",d:"Набор ресурса. Заземление Металла."},{p:"З",n:"Три Генерала",d:"Усиление домашнего контура."}],"Дефолт":[{p:"ЮВ",n:"Три Генерала",d:"Выведение избыточного Металла."}]};
+function render(){
+    const day=new Date().toLocaleDateString('ru-RU',{weekday:'long'});
+    const fd=day.charAt(0).toUpperCase()+day.slice(1);
+    const list=data[fd]||data["Дефолт"];
+    document.getElementById('box').innerHTML=list.map(s=>`<div class="card"><b>[${s.p}] ${s.n}</b><br><span style="color:#737373">${s.d}</span></div>`).join('');
+}
+function handle(e){
+    let h=e.webkitCompassHeading||Math.abs(e.alpha-360);
+    if(h!==undefined){
+        let r=Math.round(h);document.getElementById('compass').style.transform=`rotate(${-r}deg)`;
+        document.getElementById('az').innerText=`${r}°`;
+        let l="СЕВЕР";if(r>=23&&r<68)l="СВ";else if(r>=68&&r<113)l="ВОСТОК";else if(r>=113&&r<158)l="ЮВ";else if(r>=158&&r<203)l="ЮГ";else if(r>=203&&r<248)l="ЮЗ";else if(r>=248&&r<293)l="ЗАПАД";else if(r>=293&&r<338)l="СЗ";
+        document.getElementById('dl').innerText=l;
+    }
+}
+document.getElementById('btn').addEventListener('click',()=>{
+    if(tg?.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+        DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted'){window.addEventListener('deviceorientation',handle,true);document.getElementById('btn').style.display='none';}});
+    }else{window.addEventListener('deviceorientation',handle,true);document.getElementById('btn').style.display='none';}
+});
+setInterval(tick,1000);tick();render();
+</script>
 </body>
 </html>
 
