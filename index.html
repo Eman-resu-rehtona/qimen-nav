@@ -5,24 +5,34 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <script src="https://telegram.org"></script>
 <style>
-body{background:#121212;color:#e5e5e5;font-family:monospace;padding:20px;text-align:center;}
-header{border-bottom:1px solid #262626;padding-bottom:10px;margin-bottom:20px;display:flex;justify-content:space-between;font-size:11px;}
-#compass{width:220px;height:220px;border-radius:50%;border:1px solid #404040;margin:30px auto;position:relative;background:#0a0a0a;display:flex;align-items:center;justify-content:center;transition:transform 0.1s;}
+body{background:#121212;color:#e5e5e5;font-family:monospace;padding:15px;text-align:center;}
+header{border-bottom:1px solid #262626;padding-bottom:10px;margin-bottom:15px;display:flex;justify-content:space-between;font-size:11px;}
+#compass{width:180px;height:180px;border-radius:50%;border:1px solid #404040;margin:15px auto;position:relative;background:#0a0a0a;display:flex;align-items:center;justify-content:center;transition:transform 0.1s;}
 .axis{position:absolute;background:rgba(255,255,255,0.1);}
-#btn{background:#1f1f1f;color:#a3a3a3;border:1px solid #404040;padding:10px 20px;border-radius:4px;cursor:pointer;}
-.card{background:#0a0a0a;border:1px solid #262626;padding:10px;margin-top:10px;text-align:left;font-size:12px;}
+#btn{background:#1f1f1f;color:#a3a3a3;border:1px solid #404040;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:12px;}
+.section-title{text-align:left;font-size:11px;color:#737373;text-transform:uppercase;margin-top:15px;letter-spacing:1px;}
+.card{background:#0a0a0a;border:1px solid #262626;padding:10px;margin-top:8px;text-align:left;font-size:12px;border-radius:4px;}
+.stars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;background:#171717;padding:5px;border:1px solid #262626;}
+.star-cell{background:#0a0a0a;padding:8px;font-size:11px;border:1px solid #262626;}
+.active-west{border-color:#a3a3a3;background:#121212;}
 </style>
 </head>
 <body>
 <header><span id="st">СОЛНЦЕ: --:--</span><span id="hp">-- --</span></header>
-<div id="pointer" style="color:#fff;font-size:18px;">▲</div>
+<div id="pointer" style="color:#fff;font-size:16px;">▲</div>
 <div id="compass">
     <div class="axis" style="width:100%;height:1px;"></div>
     <div class="axis" style="height:100%;width:1px;"></div>
     <div style="z-index:5;"><h2 id="az">0°</h2><small id="dl">СЕВЕР</small></div>
 </div>
 <button id="btn">Включить гироскоп</button>
+
+<div class="section-title">Прогулки Ци Мень</div>
 <div id="box"></div>
+
+<div class="section-title">Летящие Звезды (Западный контур)</div>
+<div id="stars-box"></div>
+
 <script>
 const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
 function tick(){
@@ -35,13 +45,46 @@ function tick(){
     else if(h>=15&&h<17)b="申 Обезьяна";else if(h>=17&&h<19)b="酉 Петух";else if(h>=19&&h<21)b="戌 Собака";else if(h>=21&&h<23)b="亥 Свинья";
     document.getElementById('hp').innerText=b;
 }
-const data={"Вторник":[{p:"СЗ",n:"Птица падает в гнездо",d:"Набор ресурса. Заземление Металла."},{p:"З",n:"Три Генерала",d:"Усиление домашнего контура."}],"Дефолт":[{p:"ЮВ",n:"Три Генерала",d:"Выведение избыточного Металла."}]};
-function render(){
+
+const walkData={"Вторник":[{p:"СЗ",n:"Птица падает в гнездо",d:"Набор ресурса. Заземление Металла."},{p:"З",n:"Три Генерала",d:"Усиление домашнего контура."}],"Дефолт":[{p:"ЮВ",n:"Три Генерала",d:"Выведение избыточного Металла."}]};
+
+function renderWalks(){
     const day=new Date().toLocaleDateString('ru-RU',{weekday:'long'});
     const fd=day.charAt(0).toUpperCase()+day.slice(1);
-    const list=data[fd]||data["Дефолт"];
+    const list=walkData[fd]||walkData["Дефолт"];
     document.getElementById('box').innerHTML=list.map(s=>`<div class="card"><b>[${s.p}] ${s.n}</b><br><span style="color:#737373">${s.d}</span></div>`).join('');
 }
+
+// Калькулятор Летящих Звезд на 2026 год (9 период)
+function calcStars(){
+    // Константы звезд на Октябрь 2026
+    const stars = {
+        NW: {y:4, m:5, name:"СЗ"},  N: {y:9, m:1, name:"Север"},  NE: {y:2, m:3, name:"СВ"},
+        W:  {y:6, m:7, name:"Запад"}, C: {y:8, m:9, name:"Центр"}, E:  {y:1, m:2, name:"Восток"},
+        SW: {y:1, m:2, name:"ЮЗ"},  S: {y:5, m:6, name:"Юг"},    SE: {y:3, m:4, name:"ЮВ"}
+    };
+    
+    // Рендер тактической сетки (Логика Ло-Шу, Юг вверху)
+    const gridHtml = `
+        <div class="stars-grid">
+            <div class="star-cell">ЮВ<br>Год:${stars.SE.y} / М:${stars.SE.m}</div>
+            <div class="star-cell">ЮГ<br>Год:${stars.S.y} / М:${stars.S.m}</div>
+            <div class="star-cell">ЮЗ<br>Год:${stars.SW.y} / М:${stars.SW.m}</div>
+            <div class="star-cell">ВОСТОК<br>Год:${stars.E.y} / М:${stars.E.m}</div>
+            <div class="star-cell">ЦЕНТР<br>Год:${stars.C.y} / М:${stars.C.m}</div>
+            <div class="star-cell active-west">ЗАПАД<br><b>Год:${stars.W.y} / М:${stars.W.m}</b></div>
+            <div class="star-cell">СВ<br>Год:${stars.NE.y} / М:${stars.NE.m}</div>
+            <div class="star-cell">СЕВЕР<br>Год:${stars.N.y} / М:${stars.N.m}</div>
+            <div class="star-cell">СЗ<br>Год:${stars.NW.y} / М:${stars.NW.m}</div>
+        </div>
+        <div class="card" style="border-color:#525252; margin-top:10px;">
+            <b>Аудит Запада (ЖК Life-Приморский):</b><br>
+            <span style="color:#a3a3a3">Вектор окон под контролем звезд 6 (Белая) и 7 (Алая). Двойной Металл периода. Ситуация требует заземления, чтобы избежать избыточного давления. Металл меча удерживает периметр. 800г нефрита за стеной чабани работает как громоотвод, поглощая избыток жара Змей и гася жесткость 7-ки. Контур стабилен.</span>
+        </div>
+    `;
+    document.getElementById('stars-box').innerHTML = gridHtml;
+}
+
 function handle(e){
     let h=e.webkitCompassHeading||Math.abs(e.alpha-360);
     if(h!==undefined){
@@ -51,14 +94,15 @@ function handle(e){
         document.getElementById('dl').innerText=l;
     }
 }
+
 document.getElementById('btn').addEventListener('click',()=>{
     if(tg?.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
     if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
         DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted'){window.addEventListener('deviceorientation',handle,true);document.getElementById('btn').style.display='none';}});
     }else{window.addEventListener('deviceorientation',handle,true);document.getElementById('btn').style.display='none';}
 });
-setInterval(tick,1000);tick();render();
+
+setInterval(tick,1000);tick();renderWalks();calcStars();
 </script>
 </body>
 </html>
-
