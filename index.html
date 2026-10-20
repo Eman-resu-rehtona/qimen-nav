@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ци Мень • Навигатор</title>
-    <!-- Tailwind CSS для лаконичной верстки -->
-    <script src="https://jsdelivr.net"></script>
+    <!-- Стабильная версия CSS без блокировок со стороны iOS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Telegram WebApp API -->
     <script src="https://telegram.org"></script>
     <style>
@@ -19,68 +19,58 @@
         }
     </style>
 </head>
-<body class="flex flex-col h-screen justify-between p-4 antialiased selection:bg-neutral-700">
+<body class="flex flex-col h-screen justify-between p-4 antialiased">
 
-    <!-- Хедер: Статус и Время -->
+    <!-- Хедер -->
     <header class="border-b border-neutral-800 pb-3">
-        <div class="flex justify-between items-center text-xs tracking-wider text-neutral-500">
+        <div class="flex justify-between items-center text-[10px] tracking-wider text-neutral-500">
             <span>ПРОФИЛЬ: ГЭН ШЭН (МЕТАЛЛ)</span>
             <span id="solar-time-display">ИСТИННОЕ СОЛНЕЧНОЕ: --:--</span>
         </div>
         <div class="mt-2 flex justify-between items-baseline">
-            <h1 class="text-xl font-bold tracking-tight text-neutral-200">ПРОГУЛКИ ЦИ МЕНЬ</h1>
-            <div id="current-hour-pillar" class="text-sm px-2 py-0.5 bg-neutral-900 border border-neutral-800 rounded text-neutral-300">
+            <h1 class="text-lg font-bold tracking-tight text-neutral-200">ПРОГУЛКИ ЦИ МЕНЬ</h1>
+            <div id="current-hour-pillar" class="text-xs px-2 py-0.5 bg-neutral-900 border border-neutral-800 rounded text-neutral-300">
                 -- --
             </div>
         </div>
     </header>
 
-    <!-- Центр: Интерактивный компас 8 Дворцов -->
+    <!-- Компас -->
     <main class="flex flex-col items-center justify-center my-auto relative">
-        <!-- Стрелка-указатель -->
         <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-neutral-200 absolute top-4 z-10"></div>
         
-        <!-- Диск компаса -->
-        <div id="compass" class="compass-ring w-64 h-64 rounded-full border-2 border-neutral-800 flex items-center justify-center relative bg-neutral-950/50 shadow-2xl">
-            <!-- Внутреннее перекрестие -->
+        <div id="compass" class="compass-ring w-60 h-60 rounded-full border border-neutral-800 flex items-center justify-center relative bg-neutral-950/50">
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-full h-[1px] bg-neutral-900/50"></div>
-                <div class="h-full w-[1px] bg-neutral-900/50"></div>
+                <div class="w-full h-[1px] bg-neutral-900/30"></div>
+                <div class="h-full w-[1px] bg-neutral-900/30"></div>
             </div>
             
-            <!-- Лимб направлений -->
-            <span class="absolute top-2 font-bold text-neutral-400 text-sm">N</span>
-            <span class="absolute right-2 font-bold text-neutral-600 text-sm">E</span>
-            <span class="absolute bottom-2 font-bold text-neutral-600 text-sm">S</span>
-            <span class="absolute left-2 font-bold text-neutral-600 text-sm">W</span>
+            <span class="absolute top-2 font-bold text-neutral-400 text-xs">N</span>
+            <span class="absolute right-2 font-bold text-neutral-600 text-xs">E</span>
+            <span class="absolute bottom-2 font-bold text-neutral-600 text-xs">S</span>
+            <span class="absolute left-2 font-bold text-neutral-600 text-xs">W</span>
             
-            <!-- Азимут в центре -->
             <div class="flex flex-col items-center">
                 <span id="azimuth-val" class="text-2xl font-bold text-neutral-100">0°</span>
-                <span id="direction-letter" class="text-xs text-neutral-500 mt-0.5">СЕВЕР</span>
+                <span id="direction-letter" class="text-[10px] text-neutral-500 mt-0.5 tracking-wider">СЕВЕР</span>
             </div>
         </div>
 
-        <!-- Кнопка калибровки -->
-        <button id="geo-btn" class="mt-6 text-xs text-neutral-400 border border-neutral-800 bg-neutral-900/50 px-4 py-2 rounded hover:bg-neutral-800 transition-colors active:scale-95">
+        <button id="geo-btn" class="mt-6 text-xs text-neutral-400 border border-neutral-800 bg-neutral-900 px-4 py-2 rounded">
             Включить компас
         </button>
     </main>
 
-    <!-- Футер: Доступные векторы и структуры -->
+    <!-- Активные структуры -->
     <footer class="border-t border-neutral-800 pt-3">
-        <div class="text-xs text-neutral-500 tracking-wider mb-2">АКТИВНЫЕ СТРУКТУРЫ:</div>
+        <div class="text-[10px] text-neutral-500 tracking-wider mb-2">АКТИВНЫЕ СТРУКТУРЫ:</div>
         <div id="structures-list" class="space-y-2">
-            <div class="p-3 bg-neutral-900/30 border border-neutral-950 rounded flex justify-between items-center">
-                <div>
-                    <div class="text-sm font-medium text-neutral-300">Расчет векторов...</div>
-                    <div class="text-xs text-neutral-600 mt-0.5">Определяем положение солнца в СПб</div>
-                </div>
+            <div class="p-3 bg-neutral-900 border border-neutral-800 rounded flex justify-between items-center">
+                <div class="text-xs text-neutral-400">Синхронизация шлюзов...</div>
             </div>
         </div>
     </footer>
 
-    <script src="./app.js"></script>
 </body>
 </html>
 
